@@ -1,3 +1,19 @@
 {
-
+  "editor.tabSize": 2,
+  "editor.renderWhitespace": "boundary",
+  "editor.fontSize": 24,
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "editor.renderLineHighlight": "all",
+  "editor.rulers": [
+    80,
+    120
+  ],
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  "html.format.endWithNewline": true,
+  "html.suggest.angular1": false,
+  "tslint.alwaysShowStatus": true,
+  "eslint.alwaysShowStatus": true
 }
