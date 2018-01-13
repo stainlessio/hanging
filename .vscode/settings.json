@@ -1,7 +1,7 @@
 {
   "editor.tabSize": 2,
   "editor.renderWhitespace": "boundary",
-  "editor.fontSize": 24,
+  "editor.mouseWheelZoom": true,
   "editor.formatOnPaste": true,
   "editor.formatOnSave": true,
   "editor.renderLineHighlight": "all",
