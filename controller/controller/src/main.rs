@@ -1,7 +1,13 @@
 #![cfg_attr(feature="clippy", feature(plugin))]
 #![cfg_attr(feature="clippy", plugin(clippy))]
+#![feature(plugin)]
+#![plugin(rocket_codegen)]
+#[macro_use]
+extern crate bitflags;
+extern crate rocket;
 
 mod event;
+mod device;
 use std::process;
 
 fn main() {
