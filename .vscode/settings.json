@@ -15,5 +15,6 @@
   "html.format.endWithNewline": true,
   "html.suggest.angular1": false,
   "tslint.alwaysShowStatus": true,
-  "eslint.alwaysShowStatus": true
+  "eslint.alwaysShowStatus": true,
+  "rust.workspace_mode": true
 }

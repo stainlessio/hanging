@@ -1,0 +1,7 @@
+[package]
+name = "controller"
+version = "0.1.0"
+authors = ["Russell Hay <russell.hay@gmail.com>"]
+
+[dependencies]
+clippy = { version = "*", optional = true }
