@@ -1,31 +1,42 @@
-use std::sync::mpsc::channel;
 use super::Event;
+use tokio_core::reactor::{Core, Handle};
+use futures::future;
+use std::io;
+use std::time::{Duration, Instant};
+use std::thread::sleep_ms;
 
 pub struct EventLoop {
-  sender: std::collection::VecDeque<Event>,
+  core: Core,
+  handle: Handle,
+  last_tick: Instant,
 }
 
 impl EventLoop {
-  pub fn new() -> Self {
-    EventLoop {}
+  pub fn new() -> io::Result<(EventLoop)> {
+    let core = Core::new()?;
+    let handle = core.handle();
+
+    Ok(EventLoop {
+      core: core,
+      handle: handle,
+      last_tick: Instant::now(),
+    })
   }
 
-  pub fn get_next_event(&mut self) -> Option<Event> {
-    self.queue.pop_front()
-  }
-
-  pub fn add_event(&mut self, event: Event) {
-    self.queue.push_back(event);
-  }
-
-  pub fn for_each<F>(&mut self, mut f: F)
-  where
-    F: FnMut(Event),
-  {
-    let drain = self.queue.drain(0..);
-    for evt in drain {
-      f(evt);
+  pub fn run_once(&mut self) -> io::Result<bool> {
+    self.core.turn(Some(Duration::from_millis(125)));
+    if self.last_tick.elapsed() > Duration::from_millis(250) {
+      // Call Registered Tick Handlers
+      println!("tick");
+      self.last_tick = Instant::now();
+      Ok(true)
+    } else {
+      Ok(false)
     }
+  }
+
+  pub fn add(&self, event: Event) {
+    self.handle.spawn(future::ok::<(), ()>(()));
   }
 }
 
@@ -34,16 +45,19 @@ mod test {
   use super::*;
 
   #[test]
-  fn test_event_loop_for_each() {
-    let mut evtloop = EventLoop::new();
-    evtloop.add_event(Event::DetectedNewDevice);
-    evtloop.add_event(Event::Shutdown);
-    let mut actual: Vec<Event> = Vec::new();
-    evtloop.for_each(|evt| {
-      actual.push(evt);
-    });
-    assert_eq!(actual.len(), 2);
-    assert_eq!(actual[0], Event::DetectedNewDevice);
-    assert_eq!(actual[1], Event::Shutdown);
+  fn test_eventloop_new_works() {
+    let mut evtloop = EventLoop::new().unwrap();
+    let actual = evtloop.run_once();
+    assert!(actual.is_ok());
+  }
+
+  #[test]
+  fn test_eventloop_tick_triggered() {
+    let mut evtloop = EventLoop::new().unwrap();
+    let actual = evtloop.run_once().unwrap();
+    assert!(!actual);
+    sleep_ms(500);
+    let actual = evtloop.run_once().unwrap();
+    assert!(actual);
   }
 }

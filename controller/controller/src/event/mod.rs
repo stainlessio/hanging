@@ -20,12 +20,4 @@ mod test {
     let expected = Event::Shutdown;
     assert_eq!(expected, Event::Shutdown);
   }
-
-  #[test]
-  fn test_get_next_event() {
-    let mut evtloop = EventLoop::new();
-    evtloop.add_event(Event::Shutdown);
-    let actual = evtloop.get_next_event();
-    assert_eq!(actual, Some(Event::Shutdown));
-  }
 }
