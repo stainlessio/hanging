@@ -25,11 +25,8 @@ fn post_shutdown_message() -> &'static str {
 
 fn main() {
     let mut evtloop = EventLoop::new().unwrap();
-    loop {
-        if evtloop.run_once().unwrap() {
-            evtloop.add(Event::Shutdown);
-        }
-    }
+
+    evtloop.run();
     // evtloop.add_event(Event::DetectedNewDevice);
     // evtloop.add_event(Event::DetectedNewDevice);
     // evtloop.add_event(Event::DetectedNewDevice);

@@ -1,6 +1,8 @@
 use super::Event;
-use tokio_core::reactor::{Core, Handle};
+use tokio_core::reactor::{Core, Handle, Remote};
+use futures::prelude::*;
 use futures::future;
+use futures::sync::mpsc;
 use std::io;
 use std::time::{Duration, Instant};
 use std::thread::sleep_ms;
@@ -9,6 +11,8 @@ pub struct EventLoop {
   core: Core,
   handle: Handle,
   last_tick: Instant,
+  sender: mpsc::Sender<Event>,
+  receiver: mpsc::Receiver<Event>,
 }
 
 impl EventLoop {
@@ -16,48 +20,45 @@ impl EventLoop {
     let core = Core::new()?;
     let handle = core.handle();
 
+    let (tx, rx) = mpsc::channel(1); // TODO: Add a tunable capacity
+
     Ok(EventLoop {
       core: core,
       handle: handle,
       last_tick: Instant::now(),
+      sender: tx,
+      receiver: rx,
     })
   }
 
-  pub fn run_once(&mut self) -> io::Result<bool> {
-    self.core.turn(Some(Duration::from_millis(125)));
-    if self.last_tick.elapsed() > Duration::from_millis(250) {
-      // Call Registered Tick Handlers
-      println!("tick");
-      self.last_tick = Instant::now();
-      Ok(true)
-    } else {
-      Ok(false)
-    }
+  pub fn remote(&self) -> Remote {
+    self.core.remote()
   }
 
-  pub fn add(&self, event: Event) {
-    self.handle.spawn(future::ok::<(), ()>(()));
+  pub fn run(&mut self) {
+    let process_events = self.receiver.by_ref().for_each(|res| {
+      println!("{:?}", res);
+      Ok(())
+    });
+    self.core.run(process_events);
   }
+
+  pub fn add(self, event: Event) {
+    self.handle.spawn(
+      self
+        .sender
+        .send(event)
+        .and_then(|_| Ok(()))
+        .or_else(|_| Err(())),
+    );
+  }
+}
+
+pub fn wrap_event_in_future(sender: &Sender<Event>, event: Event) -> Send {
+  sender.send(event).and_then(|_| Ok(())).or_else(|_| Err(()))
 }
 
 #[cfg(test)]
 mod test {
   use super::*;
-
-  #[test]
-  fn test_eventloop_new_works() {
-    let mut evtloop = EventLoop::new().unwrap();
-    let actual = evtloop.run_once();
-    assert!(actual.is_ok());
-  }
-
-  #[test]
-  fn test_eventloop_tick_triggered() {
-    let mut evtloop = EventLoop::new().unwrap();
-    let actual = evtloop.run_once().unwrap();
-    assert!(!actual);
-    sleep_ms(500);
-    let actual = evtloop.run_once().unwrap();
-    assert!(actual);
-  }
 }
