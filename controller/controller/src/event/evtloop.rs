@@ -1,11 +1,10 @@
 use super::Event;
 use tokio_core::reactor::{Core, Handle, Remote};
 use futures::prelude::*;
-use futures::future;
+// use futures::future;
 use futures::sync::mpsc;
 use std::io;
-use std::time::{Duration, Instant};
-use std::thread::sleep_ms;
+use std::time::Instant;
 
 pub struct EventLoop {
   core: Core,
@@ -52,10 +51,6 @@ impl EventLoop {
         .or_else(|_| Err(())),
     );
   }
-}
-
-pub fn wrap_event_in_future(sender: &Sender<Event>, event: Event) -> Send {
-  sender.send(event).and_then(|_| Ok(())).or_else(|_| Err(()))
 }
 
 #[cfg(test)]
