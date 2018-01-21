@@ -1,10 +1,10 @@
 use super::Event;
 use tokio_core::reactor::{Core, Handle, Remote};
 use futures::prelude::*;
-// use futures::future;
 use futures::sync::mpsc;
 use std::io;
 use std::time::Instant;
+use std::process;
 
 pub struct EventLoop {
   core: Core,
@@ -36,7 +36,9 @@ impl EventLoop {
 
   pub fn run(&mut self) {
     let process_events = self.receiver.by_ref().for_each(|res| {
-      println!("{:?}", res);
+      match res {
+        x => println!("Received Event: {:?}", x),
+      };
       Ok(())
     });
     match self.core.run(process_events) {
@@ -59,16 +61,9 @@ impl EventLoop {
   }
 }
 
-pub fn send_event(remote: Remote, sender: mpsc::Sender<Event>, event: Event) {
-  remote.spawn(|_| {
-    sender
-      .send(event)
-      .and_then(|evt| {
-        println!("Sent {:?}", evt);
-        Ok(())
-      })
-      .or_else(|_| Err(()))
-  });
+pub fn send_event(remote: &Remote, borrowed_sender: &mpsc::Sender<Event>, event: Event) {
+  let sender = borrowed_sender.clone();
+  remote.spawn(|_| sender.send(event).and_then(|_| Ok(())).or_else(|_| Err(())));
 }
 
 #[cfg(test)]
