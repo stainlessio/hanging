@@ -10,7 +10,7 @@ pub struct EventLoop {
   core: Core,
   handle: Handle,
   last_tick: Instant,
-  sender: mpsc::Sender<Event>,
+  pub sender: mpsc::Sender<Event>,
   receiver: mpsc::Receiver<Event>,
 }
 
@@ -39,7 +39,13 @@ impl EventLoop {
       println!("{:?}", res);
       Ok(())
     });
-    self.core.run(process_events);
+    match self.core.run(process_events) {
+      Ok(_) => (),
+      Err(err) => {
+        println!("Error: {:?}", err);
+        ()
+      }
+    }
   }
 
   pub fn add(self, event: Event) {
@@ -51,6 +57,18 @@ impl EventLoop {
         .or_else(|_| Err(())),
     );
   }
+}
+
+pub fn send_event(remote: Remote, sender: mpsc::Sender<Event>, event: Event) {
+  remote.spawn(|_| {
+    sender
+      .send(event)
+      .and_then(|evt| {
+        println!("Sent {:?}", evt);
+        Ok(())
+      })
+      .or_else(|_| Err(()))
+  });
 }
 
 #[cfg(test)]

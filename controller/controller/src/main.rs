@@ -15,8 +15,8 @@ mod device;
 use std::process;
 // use rocket::State;
 
-// use event::Event;
-use event::evtloop::EventLoop;
+use event::Event;
+use event::evtloop::{send_event, EventLoop};
 use std::thread;
 use std::time::Duration;
 
@@ -27,10 +27,12 @@ fn post_shutdown_message() -> &'static str {
 
 fn main() {
     let mut evtloop = EventLoop::new().unwrap();
+    let sender = evtloop.sender.clone();
+    let remote = evtloop.remote();
 
-    thread::spawn(|| {
+    thread::spawn(move || {
         thread::sleep(Duration::from_secs(1));
-        evtloop.add()
+        send_event(remote, sender, Event::Shutdown);
     });
 
     evtloop.run();
