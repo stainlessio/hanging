@@ -26,9 +26,12 @@ use futures::sync::mpsc::Sender;
 use event::Event;
 use event::evtloop::{send_event, EventLoop};
 use std::thread;
+use std::io::Cursor;
 // use std::time::Duration;
 
 use rocket_contrib::Json;
+use rocket::response::Response;
+use rocket::http::{hyper, ContentType, Status};
 
 struct SenderState {
     remote: Remote,
@@ -36,9 +39,16 @@ struct SenderState {
 }
 
 #[get("/triggerEvent/<event>")]
-fn trigger_event(state: State<SenderState>, event: Event) -> &'static str {
+fn trigger_event(state: State<SenderState>, event: Event) -> Result<Response, Status> {
     send_event(&state.remote, &state.sender, event);
-    "OK"
+    let response = Response::build()
+        .status(Status::Ok)
+        .header(ContentType::Plain)
+        .header(hyper::header::AccessControlAllowOrigin::Any)
+        .sized_body(Cursor::new("OK"))
+        .ok();
+
+    response
 }
 
 #[get("/config")]
