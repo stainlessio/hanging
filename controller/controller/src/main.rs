@@ -7,13 +7,18 @@
 extern crate bitflags;
 extern crate futures;
 extern crate rocket;
+#[macro_use]
+extern crate rocket_contrib;
+#[macro_use]
+extern crate serde_derive;
 extern crate tokio_core;
 extern crate tokio_io;
 
 mod event;
 mod device;
+mod config;
 
-use std::process;
+// use std::process;
 use rocket::State;
 use tokio_core::reactor::Remote;
 use futures::sync::mpsc::Sender;
@@ -21,23 +26,24 @@ use futures::sync::mpsc::Sender;
 use event::Event;
 use event::evtloop::{send_event, EventLoop};
 use std::thread;
-use std::time::Duration;
+// use std::time::Duration;
+
+use rocket_contrib::Json;
 
 struct SenderState {
     remote: Remote,
     sender: Sender<Event>,
 }
 
-// #[get("/shutdown")]
-// fn post_shutdown_message(state: State<SenderState>) -> &'static str {
-//     send_event(&state.remote, &state.sender, Event::Shutdown);
-//     "OK"
-// }
-
-#[get("/add_device")]
-fn add_device(state: State<SenderState>) -> &'static str {
-    send_event(&state.remote, &state.sender, Event::DetectedNewDevice);
+#[get("/triggerEvent/<event>")]
+fn trigger_event(state: State<SenderState>, event: Event) -> &'static str {
+    send_event(&state.remote, &state.sender, event);
     "OK"
+}
+
+#[get("/config")]
+fn get_config() -> Json<config::Config> {
+    Json(config::load_config(""))
 }
 
 fn main() {
@@ -47,7 +53,7 @@ fn main() {
 
     thread::spawn(|| {
         rocket::ignite()
-            .mount("/", routes![add_device])
+            .mount("/", routes![trigger_event, get_config])
             .manage(SenderState {
                 remote: remote,
                 sender: sender,

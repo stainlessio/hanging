@@ -1,0 +1,7 @@
+{
+  "tuning": {
+    "Event Debug": {
+      "NewDeviceAttached": "trigger"
+    }
+  }
+}
