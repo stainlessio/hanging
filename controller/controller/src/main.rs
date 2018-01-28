@@ -11,6 +11,8 @@ extern crate rocket;
 extern crate rocket_contrib;
 #[macro_use]
 extern crate serde_derive;
+extern crate serde;
+extern crate serde_json;
 extern crate tokio_core;
 extern crate tokio_io;
 
@@ -53,10 +55,11 @@ fn trigger_event(state: State<SenderState>, event: Event) -> Result<Response, St
 
 #[get("/config")]
 fn get_config() -> Json<config::Config> {
-    Json(config::load_config(""))
+    Json(config::load_config("config.json").unwrap_or(config::Config::default()))
 }
 
 fn main() {
+    config::save_config("test.json").ok();
     let mut evtloop = EventLoop::new().unwrap();
     let sender = evtloop.sender.clone();
     let remote = evtloop.remote();

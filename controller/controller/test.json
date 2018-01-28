@@ -1,6 +1,6 @@
 {
   "tuning": {
-    "DetectedNewDevice": {},
+    "DetectedNewDevice": null,
     "TickTiming": {
       "IntSlider": {
         "minValue": 1,
