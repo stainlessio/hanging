@@ -7,6 +7,7 @@
         "maxValue": 60,
         "currentValue": 30
       }
-    }
+    },
+    "TestTrigger": "Trigger"
   }
 }

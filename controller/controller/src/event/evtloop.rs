@@ -4,7 +4,6 @@ use futures::prelude::*;
 use futures::sync::mpsc;
 use std::io;
 use std::time::Instant;
-use std::process;
 
 pub struct EventLoop {
   core: Core,

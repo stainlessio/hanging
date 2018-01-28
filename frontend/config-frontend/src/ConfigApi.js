@@ -12,6 +12,10 @@ export default {
         }
         console.log(`sent ${eventType}`);
       });
+  },
+  getConfig: () => {
+    var url = 'http://localhost:8000/config';
+    return fetch(url).then(result => result.json());
   }
 };
 

@@ -7,8 +7,6 @@ use std::default::Default;
 use serde_json;
 use std::boxed::Box;
 
-use rocket_contrib::Json;
-
 pub fn load_config(filename: &str) -> Result<Config, Box<Error>> {
   let path = Path::new(filename); // TODO: Figure out CWD
   let file = File::open(&path)?;
@@ -29,7 +27,8 @@ pub fn save_config(filename: &str) -> Result<(), Box<Error>> {
       DetectedNewDevice: None,
       TickTiming: Some(InputType::IntSlider {
         minValue: 1, maxValue: 60, currentValue: 30
-      })
+      }),
+      TestTrigger: Some(InputType::Trigger),
     })
   };
   serde_json::to_writer_pretty(file, &config)?;
@@ -44,16 +43,19 @@ pub struct Config {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Tuning {
   DetectedNewDevice: Option<EventType>,
-  TickTiming: Option<InputType>
+  TickTiming: Option<InputType>,
+  TestTrigger: Option<InputType>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct EventType {}
+pub enum EventType {
+  EventType,
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum InputType {
   Trigger,
-  IntSlider {minValue: i32, maxValue: i32, currentValue: i32}
+  IntSlider {minValue: i32, maxValue: i32, currentValue: i32},
 }
 
 impl Default for Config {
