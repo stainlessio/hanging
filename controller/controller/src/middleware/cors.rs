@@ -1,21 +1,23 @@
-use rocket::{Request, Response};
-use rocket::fairing::{Fairing, Info, Kind};
-use rocket::http::{hyper};
+use rocket_cors;
+use rocket_cors::{AllowedHeaders, AllowedMethods, AllowedOrigins};
+use std::str::FromStr;
 
-#[derive(Default)]
-pub struct Cors {
+pub struct Cors {}
 
-}
+impl Cors {
+  pub fn default() -> rocket_cors::Cors {
+    let origins = AllowedOrigins::all();
+    let headers = AllowedHeaders::all();
+    let methods: AllowedMethods = ["Get", "Post"]
+      .iter()
+      .map(|s| FromStr::from_str(s).unwrap())
+      .collect();
 
-impl Fairing for Cors {
-  fn info(&self) -> Info {
-    Info {
-      name: "Enable Cors allow any",
-      kind: Kind::Response
+    rocket_cors::Cors {
+      allowed_origins: origins,
+      allowed_headers: headers,
+      allowed_methods: methods,
+      ..Default::default()
     }
-  }
-
-  fn on_response(&self, request: &Request, response: &mut Response) {
-    response.set_header(hyper::header::AccessControlAllowOrigin::Any);
   }
 }

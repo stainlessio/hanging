@@ -33,7 +33,8 @@ class App extends Component {
           {intSliders
             .map(slider => <div key={slider.name}><label>{slider.name}</label><IntSlider
               minValue={slider.value.minValue} maxValue={slider.value.maxValue}
-              value={slider.value.currentValue}
+              value={slider.value.currentValue} name={slider.name}
+              onAfterChange={(value) => ConfigApi.setConfig(slider.name, value)}
             /></div>)}
         </div>
       </div>

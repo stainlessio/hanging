@@ -1,6 +1,6 @@
 #![cfg_attr(feature = "clippy", feature(plugin))]
 #![cfg_attr(feature = "clippy", plugin(clippy))]
-#![feature(plugin)]
+#![feature(plugin, custom_derive)]
 #![plugin(rocket_codegen)]
 #![feature(conservative_impl_trait)]
 #[macro_use]
@@ -8,6 +8,7 @@ extern crate bitflags;
 extern crate futures;
 extern crate rocket;
 extern crate rocket_contrib;
+extern crate rocket_cors;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
@@ -83,7 +84,7 @@ fn get_config() -> Json<config::Config> {
 
 #[post("/config/<name>", data = "<value>")]
 fn update_config(name: String, value: IntValue) -> Result<Response<'static>, Status> {
-    // println!("{:?} = {:?}", name, value);
+    println!("{:?} = {:?}", name, value);
     let response = Response::build()
         .status(Status::Ok)
         .header(ContentType::Plain)
@@ -94,20 +95,24 @@ fn update_config(name: String, value: IntValue) -> Result<Response<'static>, Sta
 }
 
 fn main() {
-    config::save_config("test.json").ok();
+    // config::save_config("test.json").ok();
     let mut evtloop = EventLoop::new().unwrap();
     let sender = evtloop.sender.clone();
     let remote = evtloop.remote();
 
     thread::spawn(|| {
-        rocket::ignite()
+        let ship = rocket::ignite()
+            .mount("/", routes![trigger_event, get_config, update_config,])
             .attach(middleware::cors::Cors::default())
-            .mount("/", routes![trigger_event, get_config])
             .manage(SenderState {
                 remote: remote,
                 sender: sender,
-            })
-            .launch();
+            });
+        for route in ship.routes() {
+            println!("{:?}", route);
+        }
+
+        ship.launch();
     });
 
     evtloop.run();

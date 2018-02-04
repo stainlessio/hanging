@@ -16,6 +16,20 @@ export default {
   getConfig: () => {
     var url = 'http://localhost:8000/config';
     return fetch(url).then(result => result.json());
+  },
+
+  setConfig: (name, value) => {
+    const url = `http://localhost:8000/config/${name}`;
+    const body = `${value}`;
+
+    request.post(url).type('json').send(body).then((err, res) => {
+      if (err) {
+        console.log(err); console.log(res);
+        return;
+      }
+
+      console.log(`set ${name} = ${value}`);
+    });
   }
 };
 

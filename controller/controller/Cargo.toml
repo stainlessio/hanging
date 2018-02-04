@@ -7,6 +7,7 @@ authors = ["Russell Hay <russell.hay@gmail.com>"]
 clippy = { version = "*", optional = true }
 rocket = "0.3.6"
 rocket_codegen = "0.3.6"
+rocket_cors = "~0.2"
 bitflags = "~1.0"
 futures = "0.1"
 tokio-core = "0.1"

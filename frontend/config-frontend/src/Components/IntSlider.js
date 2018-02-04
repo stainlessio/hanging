@@ -21,17 +21,13 @@ class IntSlider extends Component {
     });
   }
 
-  onAfterChange = (value) => {
-    // TODO: Send new current value to config system
-  }
-
 
   render() {
     return (
       <CustomSlider value={this.state.value}
         max={this.state.max} min={this.state.min}
         onChange={this.onSliderChange}
-        onAfterChange={this.onAfterChange}
+        onAfterChange={this.props.onAfterChange}
         tipFormatter={value => `${value}`}
       />
     );
