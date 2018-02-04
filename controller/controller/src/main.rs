@@ -8,9 +8,9 @@ extern crate bitflags;
 extern crate futures;
 extern crate rocket;
 extern crate rocket_contrib;
+extern crate serde;
 #[macro_use]
 extern crate serde_derive;
-extern crate serde;
 extern crate serde_json;
 extern crate tokio_core;
 extern crate tokio_io;
@@ -32,7 +32,7 @@ use std::io::Read;
 
 use rocket_contrib::Json;
 use rocket::data::{self, FromData};
-use rocket::{Request, Response, Data, Outcome};
+use rocket::{Data, Outcome, Request, Response};
 use rocket::http::{ContentType, Status};
 use rocket::Outcome::*;
 
@@ -57,10 +57,9 @@ impl FromData for IntValue {
             return Failure((Status::InternalServerError, format!("{:?}", e)));
         }
 
-
         match in_value.parse::<i32>() {
             Ok(v) => Success(IntValue(v).into()),
-            Err(e) => Failure((Status::InternalServerError, format!("{:?}", e)))
+            Err(e) => Failure((Status::InternalServerError, format!("{:?}", e))),
         }
     }
 }
@@ -82,8 +81,8 @@ fn get_config() -> Json<config::Config> {
     Json(config::load_config("config.json").unwrap_or(config::Config::default()))
 }
 
-#[post("/config/<name>", data="<value>")]
-fn update_config(name: String, value: IntValue) -> Result<Response, Status> {
+#[post("/config/<name>", data = "<value>")]
+fn update_config(name: String, value: IntValue) -> Result<Response<'static>, Status> {
     // println!("{:?} = {:?}", name, value);
     let response = Response::build()
         .status(Status::Ok)

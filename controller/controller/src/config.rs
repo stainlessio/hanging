@@ -21,15 +21,17 @@ pub fn load_config(filename: &str) -> Result<Config, Box<Error>> {
 
 pub fn save_config(filename: &str) -> Result<(), Box<Error>> {
   let path = Path::new(filename);
-  let mut file = File::create(&path)?;
+  let file = File::create(&path)?;
   let config = Config {
     tuning: Some(Tuning {
       DetectedNewDevice: None,
       TickTiming: Some(InputType::IntSlider {
-        minValue: 1, maxValue: 60, currentValue: 30
+        minValue: 1,
+        maxValue: 60,
+        currentValue: 30,
       }),
       TestTrigger: Some(InputType::Trigger),
-    })
+    }),
   };
   serde_json::to_writer_pretty(file, &config)?;
   Ok(())
@@ -55,13 +57,15 @@ pub enum EventType {
 #[derive(Serialize, Deserialize, Debug)]
 pub enum InputType {
   Trigger,
-  IntSlider {minValue: i32, maxValue: i32, currentValue: i32},
+  IntSlider {
+    minValue: i32,
+    maxValue: i32,
+    currentValue: i32,
+  },
 }
 
 impl Default for Config {
   fn default() -> Self {
-    Config {
-      tuning: None
-    }
+    Config { tuning: None }
   }
 }
