@@ -22,7 +22,7 @@ class IntSlider extends Component {
   }
 
 
-  render() {
+  render () {
     return (
       <CustomSlider value={this.state.value}
         max={this.state.max} min={this.state.min}

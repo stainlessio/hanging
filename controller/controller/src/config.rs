@@ -19,34 +19,25 @@ pub fn load_config(filename: &str) -> Result<Config, Box<Error>> {
   }
 }
 
-pub fn save_config(filename: &str) -> Result<(), Box<Error>> {
-  let path = Path::new(filename);
-  let file = File::create(&path)?;
-  let config = Config {
-    tuning: Some(Tuning {
-      DetectedNewDevice: None,
-      TickTiming: Some(InputType::IntSlider {
-        minValue: 1,
-        maxValue: 60,
-        currentValue: 30,
-      }),
-      TestTrigger: Some(InputType::Trigger),
-    }),
-  };
-  serde_json::to_writer_pretty(file, &config)?;
-  Ok(())
-}
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
-  tuning: Option<Tuning>,
+  pub tuning: Option<Tuning>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+impl Config {
+  pub fn save_config(&self, filename: &str) -> Result<(), Box<Error>> {
+    let path = Path::new(filename);
+    let file = File::create(&path)?;
+    serde_json::to_writer_pretty(file, self)?;
+    Ok(())
+  }
+}
+
+#[derive(Serialize, Deserialize, Debug, Default)]
 pub struct Tuning {
-  DetectedNewDevice: Option<EventType>,
-  TickTiming: Option<InputType>,
-  TestTrigger: Option<InputType>,
+  pub DetectedNewDevice: Option<EventType>,
+  pub TickTiming: Option<InputType>,
+  pub TestTrigger: Option<InputType>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
