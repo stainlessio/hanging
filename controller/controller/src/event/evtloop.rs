@@ -4,6 +4,7 @@ use futures::prelude::*;
 use futures::sync::mpsc;
 use std::io;
 use std::time::Instant;
+use device::{Device, UnitFeatures};
 
 pub struct EventLoop {
   core: Core,
@@ -36,6 +37,17 @@ impl EventLoop {
   pub fn run(&mut self) {
     let process_events = self.receiver.by_ref().for_each(|res| {
       match res {
+        Event::DetectedNewDevice => {
+          let mut device = Device {
+            id: "foo".to_owned(),
+            features: UnitFeatures::default(),
+            port: None,
+          };
+          match device.open("COM6") {
+            Err(x) => println!("Failed to open device: {:?}", x),
+            _ => (),
+          };
+        }
         x => println!("Received Event: {:?}", x),
       };
       Ok(())

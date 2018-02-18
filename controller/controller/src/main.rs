@@ -13,6 +13,7 @@ extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
+extern crate serial;
 extern crate tokio_core;
 extern crate tokio_io;
 
@@ -91,36 +92,36 @@ fn get_config() -> Json<config::Config> {
 
 #[post("/config/<name>", data = "<value>")]
 fn update_config(name: String, value: IntValue) -> Result<Response<'static>, Status> {
-    let mut config = config::load_config("config.json")
-        .as_ref()
-        .unwrap_or_else(|_| &config::Config::default());
-    let mut tuning: &config::Tuning = config
-        .tuning
-        .as_ref()
-        .unwrap_or_else(|| &config::Tuning::default());
-    let mut tuning = match name.as_str() {
-        "TickTiming" => {
-            if let Some(input_type) = tuning.TickTiming {
-                match input_type {
-                    config::InputType::IntSlider {
-                        currentValue: _,
-                        minValue: min_value,
-                        maxValue: max_value,
-                    } => {
-                        tuning.TickTiming = Some(config::InputType::IntSlider {
-                            currentValue: value.into(),
-                            minValue: min_value,
-                            maxValue: max_value,
-                        })
-                    }
-                    _ => (),
-                }
-            }
-            Some(tuning)
-        }
-        _ => Some(tuning),
-    };
-    config.save_config("config.json").unwrap();
+    // let mut config = config::load_config("config.json")
+    //     .as_ref()
+    //     .unwrap_or_else(|_| &config::Config::default());
+    // let mut tuning: &config::Tuning = config
+    //     .tuning
+    //     .as_ref()
+    //     .unwrap_or_else(|| &config::Tuning::default());
+    // let mut tuning = match name.as_str() {
+    //     "TickTiming" => {
+    //         if let Some(input_type) = tuning.TickTiming {
+    //             match input_type {
+    //                 config::InputType::IntSlider {
+    //                     currentValue: _,
+    //                     minValue: min_value,
+    //                     maxValue: max_value,
+    //                 } => {
+    //                     tuning.TickTiming = Some(config::InputType::IntSlider {
+    //                         currentValue: value.into(),
+    //                         minValue: min_value,
+    //                         maxValue: max_value,
+    //                     })
+    //                 }
+    //                 _ => (),
+    //             }
+    //         }
+    //         Some(tuning)
+    //     }
+    //     _ => Some(tuning),
+    // };
+    // config.save_config("config.json").unwrap();
     let response = Response::build()
         .status(Status::Ok)
         .header(ContentType::Plain)
